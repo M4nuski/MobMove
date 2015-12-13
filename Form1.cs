@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -70,6 +71,7 @@ namespace MobMove
 
             units.Add(new baseUnit { Location = new Point(360, 60), Size = UnitSizes.Medium, Speed = 100 });
 
+            timestuff.Start();
         }
 
         private void OutputLabel_Paint(object sender, PaintEventArgs e)
@@ -85,7 +87,7 @@ namespace MobMove
             }
 
             //update units
-            Parallel.ForEach(units, x => x.UpdateMove(timedelta));
+            Parallel.ForEach(units, unit => unit.UpdateMove(timedelta));
 
             ResolveUnitToMapCollisions();
             ResolveUnitToUnitCollisions();
@@ -110,6 +112,7 @@ namespace MobMove
             }
 
             timestuff.Reset();
+            timestuff.Start();
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e)
@@ -182,10 +185,10 @@ namespace MobMove
         private void ResolveUnitToUnitCollisions()
         {
             //todo culling optimization
-            for (var unitA = 0; unitA < units.Count - 1; unitA++)
+            for (var unitA = 0; unitA < units.Count; unitA++)
             {
 
-                for (var unitB = unitA + 1; unitB < units.Count; unitB++)
+                for (var unitB = 0; unitB < units.Count; unitB++)
                 {
                     if (unitA != unitB)
                     {
@@ -224,28 +227,28 @@ namespace MobMove
                                 var x = Math.Min(x1, x2);
                                 
                                 var UA_newpos = AddPoint(UA_Datum, ScalePoint(UA_Slope, x));
-                                var UB_newpos = AddPoint(UB_Datum, ScalePoint(UB_Slope, x));
+                                //var UB_newpos = AddPoint(UB_Datum, ScalePoint(UB_Slope, x));
 
                                 //select best unit newpos
                                 var AB_Dist2a = D2(UA_newpos, units[unitB].Location);
-                                var AB_Dist2b = D2(units[unitA].Location, UB_newpos);
+                                //var AB_Dist2b = D2(units[unitA].Location, UB_newpos);
 
-                                if ((AB_Dist2a > AB_Dist2) || (AB_Dist2b > AB_Dist2))
-                                {
-                                    if (AB_Dist2a > AB_Dist2b)
-                                    {
-                                        units[unitA].Location = UA_newpos;
-                                    }
-                                    else
-                                    {
-                                        units[unitB].Location = UB_newpos;
-                                    }
-                                }
-                                else
-                                {
+                              //  if ((AB_Dist2a > AB_Dist2) || (AB_Dist2b > AB_Dist2))
+                              //  {
+                                  //  if (AB_Dist2a > AB_Dist2b)
+                                  //  {
+                                  //      units[unitA].Location = UA_newpos;
+                                  //  }
+                                   // else
+                                  //  {
+                                   //     units[unitB].Location = UB_newpos;
+                                   // }
+                               // }
+                               // else
+                               // {
                                     units[unitA].Location = UA_newpos;
-                                    units[unitB].Location = UB_newpos;
-                                }
+                                //    units[unitB].Location = UB_newpos;
+                                //}
 
 
 
