@@ -187,7 +187,6 @@ namespace MobMove
             //todo culling optimization
             for (var unitA = 0; unitA < units.Count; unitA++)
             {
-
                 for (var unitB = 0; unitB < units.Count; unitB++)
                 {
                     if (unitA != unitB)
@@ -195,11 +194,13 @@ namespace MobMove
                         //todo add to IUnits definition
                         var UA_Radius = unitSizes[units[unitA].Size]/2;
                         var UB_Radius = unitSizes[units[unitB].Size]/2;
+
                         var AB_Dist2 = D2(units[unitA].Location, units[unitB].Location);
                         var AB_radsum2 = (UA_Radius + UB_Radius) * (UA_Radius + UB_Radius);
+
                         if (AB_Dist2 < AB_radsum2)
                         {
-                            //collision at x*slopedelta + datum
+                            //collision at x*slopedelta + datum = 0
                             var UA_Datum = units[unitA].LastLocation;
                             var UB_Datum = units[unitB].LastLocation;
                             var UA_Slope = SubPoint(units[unitA].Location, UA_Datum);
@@ -219,44 +220,23 @@ namespace MobMove
                                 var x1 = (-b + Math.Sqrt(sqr(b) - 2 * a2 * c)) / a2;
                                 var x2 = (-b - Math.Sqrt(sqr(b) - 2 * a2 * c)) / a2;
 
-                                //clamp to datum
-                                if (x1 < 0) x1 = 0;
-                                if (x2 < 0) x2 = 0; 
+                                if ((x1 > 0) || (x2 > 0))
+                                {
+                                    //clamp to datum
+                                    if (x1 < 0) x1 = 0;
+                                    if (x2 < 0) x2 = 0;
 
-                                //select nearest to datum
-                                var x = Math.Min(x1, x2);
-                                
-                                var UA_newpos = AddPoint(UA_Datum, ScalePoint(UA_Slope, x));
-                                //var UB_newpos = AddPoint(UB_Datum, ScalePoint(UB_Slope, x));
+                                    //select nearest to datum
+                                    var x = Math.Min(x1, x2);
 
-                                //select best unit newpos
-                                var AB_Dist2a = D2(UA_newpos, units[unitB].Location);
-                                //var AB_Dist2b = D2(units[unitA].Location, UB_newpos);
+                                    var UA_newpos = AddPoint(UA_Datum, ScalePoint(UA_Slope, x));
 
-                              //  if ((AB_Dist2a > AB_Dist2) || (AB_Dist2b > AB_Dist2))
-                              //  {
-                                  //  if (AB_Dist2a > AB_Dist2b)
-                                  //  {
-                                  //      units[unitA].Location = UA_newpos;
-                                  //  }
-                                   // else
-                                  //  {
-                                   //     units[unitB].Location = UB_newpos;
-                                   // }
-                               // }
-                               // else
-                               // {
+                                    //select best unit newpos
+                                    var AB_Dist2a = D2(UA_newpos, units[unitB].Location);
+
                                     units[unitA].Location = UA_newpos;
-                                //    units[unitB].Location = UB_newpos;
-                                //}
-
-
-
-
+                                }
                             }
-
-
-
                         }
                     }
                 }
